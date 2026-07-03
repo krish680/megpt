@@ -1,0 +1,10 @@
+services:
+
+* type: web
+  name: qr-vault
+  env: python
+  plan: free
+  branch: v2
+  buildCommand: pip install -r requirements.txt
+  startCommand: python main.py
+  autoDeploy: true
