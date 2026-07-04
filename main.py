@@ -6,7 +6,7 @@ from bot import run_bot
 from config import PORT
 
 if __name__ == "__main__":
-    # Start tiny Flask health server in background
+    # tiny health server for Render/UptimeRobot
     Thread(
         target=lambda: app.run(
             host="0.0.0.0",
@@ -17,9 +17,8 @@ if __name__ == "__main__":
         daemon=True
     ).start()
 
-    # Create event loop explicitly for Python 3.14 / Render
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    # Python 3.14 fix: create event loop manually
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
-    # Start telegram bot in main thread
+    # start telegram bot
     run_bot()
