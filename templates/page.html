@@ -29,4 +29,529 @@
             --text: #ffffff;
             --muted: #f7d7e7;
             --accent: #ff7fb5;
-           
+            --accent-2: #ffd36e;
+            --shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+        }
+
+        body.theme-love,
+        body.theme-cute {
+            --bg1: #130b16;
+            --bg2: #2b1230;
+            --bg3: #4a183f;
+            --card: rgba(255, 255, 255, 0.10);
+            --card-border: rgba(255, 255, 255, 0.14);
+            --text: #ffffff;
+            --muted: #f7d7e7;
+            --accent: #ff7fb5;
+            --accent-2: #ffd36e;
+        }
+
+        body.theme-birthday {
+            --bg1: #24110a;
+            --bg2: #4a1e1a;
+            --bg3: #7a2f20;
+            --card: rgba(255, 255, 255, 0.10);
+            --card-border: rgba(255, 255, 255, 0.14);
+            --text: #ffffff;
+            --muted: #ffe3cf;
+            --accent: #ffb703;
+            --accent-2: #ffd166;
+        }
+
+        body.theme-anime {
+            --bg1: #0b1020;
+            --bg2: #182848;
+            --bg3: #3a1c71;
+            --card: rgba(255, 255, 255, 0.10);
+            --card-border: rgba(255, 255, 255, 0.14);
+            --text: #ffffff;
+            --muted: #dbeafe;
+            --accent: #8ec5ff;
+            --accent-2: #d8b4fe;
+        }
+
+        body.theme-elegant {
+            --bg1: #100d16;
+            --bg2: #22162b;
+            --bg3: #3b243f;
+            --card: rgba(255, 255, 255, 0.09);
+            --card-border: rgba(255, 232, 186, 0.18);
+            --text: #fffdf8;
+            --muted: #f5e8cf;
+            --accent: #e7c57a;
+            --accent-2: #f7d9a0;
+        }
+
+        body.theme-memory {
+            --bg1: #090909;
+            --bg2: #161616;
+            --bg3: #2a2a2a;
+            --card: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text: #f5f5f5;
+            --muted: #d7d7d7;
+            --accent: #b9a27d;
+            --accent-2: #e7d3b0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(255,255,255,0.10), transparent 20%),
+                radial-gradient(circle at bottom left, rgba(255,255,255,0.08), transparent 22%),
+                linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-hearts {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            color: rgba(255, 255, 255, 0.12);
+            animation: floatUp linear infinite;
+            user-select: none;
+        }
+
+        .heart:nth-child(1)  { left: 8%;  font-size: 20px; animation-duration: 14s; }
+        .heart:nth-child(2)  { left: 18%; font-size: 28px; animation-duration: 18s; animation-delay: 2s; }
+        .heart:nth-child(3)  { left: 28%; font-size: 16px; animation-duration: 12s; animation-delay: 1s; }
+        .heart:nth-child(4)  { left: 40%; font-size: 24px; animation-duration: 16s; animation-delay: 3s; }
+        .heart:nth-child(5)  { left: 52%; font-size: 18px; animation-duration: 13s; animation-delay: 5s; }
+        .heart:nth-child(6)  { left: 64%; font-size: 30px; animation-duration: 20s; animation-delay: 2s; }
+        .heart:nth-child(7)  { left: 75%; font-size: 22px; animation-duration: 15s; animation-delay: 4s; }
+        .heart:nth-child(8)  { left: 86%; font-size: 26px; animation-duration: 17s; animation-delay: 1s; }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-115vh) scale(1.18);
+                opacity: 0;
+            }
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 28px 18px 60px;
+        }
+
+        .hero-card,
+        .glass-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .hero-card {
+            overflow: hidden;
+        }
+
+        .hero-top {
+            text-align: center;
+            padding: 34px 24px 24px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.10);
+            color: var(--muted);
+            font-size: 14px;
+            letter-spacing: 0.4px;
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            font-size: clamp(30px, 5vw, 54px);
+            line-height: 1.08;
+            margin-bottom: 12px;
+            text-shadow: 0 6px 24px rgba(0,0,0,0.25);
+        }
+
+        .hero-subtitle {
+            max-width: 760px;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.75;
+        }
+
+        .hero-image-wrap {
+            padding: 0 18px 18px;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-height: 560px;
+            object-fit: cover;
+            border-radius: 24px;
+            display: block;
+            box-shadow: 0 18px 42px rgba(0,0,0,0.35);
+        }
+
+        .empty-image {
+            margin: 0 18px 18px;
+            min-height: 240px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 24px;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.06);
+            border: 1px dashed rgba(255,255,255,0.14);
+            color: var(--muted);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        .glass-card {
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: var(--accent-2);
+            margin-bottom: 16px;
+        }
+
+        .typewriter-box {
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.10);
+            min-height: 72px;
+        }
+
+        .typewriter-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .typewriter-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #fff;
+            min-height: 28px;
+            word-break: break-word;
+        }
+
+        .cursor {
+            display: inline-block;
+            margin-left: 2px;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .love-note {
+            white-space: pre-wrap;
+            line-height: 1.9;
+            font-size: 17px;
+            color: #fffafc;
+            word-break: break-word;
+        }
+
+        .meta-stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .mini-box {
+            padding: 20px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .mini-label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .mini-value {
+            font-size: 20px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .music-card audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .music-link-btn {
+            display: inline-block;
+            margin-top: 12px;
+            text-decoration: none;
+            color: #111;
+            background: var(--accent-2);
+            font-weight: 700;
+            padding: 11px 16px;
+            border-radius: 14px;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+
+        .music-link-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .music-note {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .qr-image {
+            width: 100%;
+            max-width: 220px;
+            display: block;
+            margin: 14px auto 0;
+            border-radius: 18px;
+            background: #fff;
+            padding: 10px;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            margin-top: 24px;
+            font-size: 14px;
+            opacity: 0.92;
+        }
+
+        @media (max-width: 860px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .page-wrap {
+                padding: 18px 12px 40px;
+            }
+
+            .hero-top {
+                padding: 24px 16px 18px;
+            }
+
+            .hero-image-wrap {
+                padding: 0 12px 12px;
+            }
+
+            .glass-card {
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .hero-card {
+                border-radius: 24px;
+            }
+
+            .hero-image,
+            .empty-image {
+                border-radius: 18px;
+            }
+
+            .mini-value {
+                font-size: 18px;
+            }
+
+            .love-note {
+                font-size: 16px;
+            }
+
+            .typewriter-text {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="
+    {% if 'love' in theme_value %}
+        theme-love
+    {% elif 'birthday' in theme_value %}
+        theme-birthday
+    {% elif 'anime' in theme_value %}
+        theme-anime
+    {% elif 'cute' in theme_value %}
+        theme-cute
+    {% elif 'elegant' in theme_value %}
+        theme-elegant
+    {% elif 'memory' in theme_value %}
+        theme-memory
+    {% else %}
+        theme-love
+    {% endif %}
+    "
+>
+    <div class="floating-hearts" aria-hidden="true">
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+        <div class="heart">❤</div>
+    </div>
+
+    <main class="page-wrap">
+        <section class="hero-card">
+            <div class="hero-top">
+                <div class="hero-badge">
+                    {% if theme %}
+                        {{ theme }}
+                    {% else %}
+                        A special memory page
+                    {% endif %}
+                </div>
+
+                <h1 class="hero-title">{{ title or "Our Beautiful Memory" }}</h1>
+
+                <p class="hero-subtitle">
+                    {% if receiver and sender %}
+                        A little corner of the internet made for <strong>{{ receiver }}</strong>, from <strong>{{ sender }}</strong>.
+                    {% elif receiver %}
+                        A little corner of the internet made for <strong>{{ receiver }}</strong>.
+                    {% else %}
+                        A little corner of the internet made to hold a beautiful memory.
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if image_url %}
+                <div class="hero-image-wrap">
+                    <img class="hero-image" src="{{ image_url }}" alt="Memory image">
+                </div>
+            {% else %}
+                <div class="empty-image">
+                    This page is ready — add a photo to make it even more personal.
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="content-grid">
+            <div class="glass-card">
+                <h2 class="section-title">A message for you 💌</h2>
+
+                <div class="typewriter-box">
+                    <div class="typewriter-label">Special note</div>
+                    <div class="typewriter-text" id="typewriter"></div>
+                </div>
+
+                <div class="love-note">{{ message or "No message added yet." }}</div>
+            </div>
+
+            <div class="meta-stack">
+                <div class="glass-card mini-box">
+                    <div class="mini-label">To</div>
+                    <div class="mini-value">{{ receiver or "Someone special" }}</div>
+                </div>
+
+                <div class="glass-card mini-box">
+                    <div class="mini-label">From</div>
+                    <div class="mini-value">{{ sender or "Someone who cares" }}</div>
+                </div>
+
+                {% if music_url %}
+                <div class="glass-card mini-box music-card">
+                    <div class="mini-label">Music</div>
+                    <div class="mini-value" style="font-size:18px; font-weight:600;">A song for this memory 🎵</div>
+
+                    {% if is_audio %}
+                        <audio controls>
+                            <source src="{{ music_url }}">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <a class="music-link-btn" href="{{ music_url }}" target="_blank">Open audio in a new tab</a>
+                    {% else %}
+                        <div class="music-note">
+                            This memory includes a music link. Tap below to open it.
+                        </div>
+                        <a class="music-link-btn" href="{{ music_url }}" target="_blank">Open Music</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if qr_url %}
+                <div class="glass-card mini-box">
+                    <div class="mini-label">QR Code</div>
+                    <div class="music-note">
+                        Scan or save this QR code to revisit the page anytime.
+                    </div>
+                    <img class="qr-image" src="{{ qr_url }}" alt="QR code">
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <p class="footer-note">Made with memories, music and a little bit of code ✨</p>
+    </main>
+
+    <script>
+        const messageText = {{ (message or "A special message lives here.")|tojson }};
+        const typewriterEl = document.getElementById("typewriter");
+
+        let i = 0;
+
+        function typeWriter() {
+            if (!typewriterEl) return;
+
+            if (i < messageText.length) {
+                typewriterEl.textContent += messageText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 28);
+            } else {
+                const cursor = document.createElement("span");
+                cursor.className = "cursor";
+                cursor.textContent = "|";
+                typewriterEl.appendChild(cursor);
+            }
+        }
+
+        window.addEventListener("load", () => {
+            typeWriter();
+        });
+    </script>
+</body>
+</html>
