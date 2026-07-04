@@ -1,21 +1,10 @@
-import threading
-from config import PORT
-from web import app
+from threading import Thread
+from keep_alive import app
 from bot import run_bot
 
-
-def start_web():
-    app.run(
-        host="0.0.0.0",
-        port=PORT,
-        debug=False,
-        use_reloader=False,
-    )
-
-
 if __name__ == "__main__":
-    bot_thread = threading.Thread(target=run_bot)
-    bot_thread.daemon = True
-    bot_thread.start()
+    # Start small Flask health server in background
+    Thread(target=lambda: app.run(host="0.0.0.0", port=10000, debug=False, use_reloader=False)).start()
 
-    start_web()
+    # Start telegram bot in main thread
+    run_bot()

@@ -1,10 +1,4 @@
-import asyncio
-import os
-from telegram import (
-    Update,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -17,7 +11,7 @@ from telegram.ext import (
 from config import BOT_TOKEN, BASE_URL
 from database import create_page
 
-# -------- Conversation States --------
+# ---------------- STATES ----------------
 (
     RECEIVER,
     THEME,
@@ -29,207 +23,161 @@ from database import create_page
 ) = range(7)
 
 
-# -------- Start --------
+# ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user.first_name
+    user = update.effective_user.first_name or "there"
 
     text = f"""
-?? Welcome, {user}!
+🌟 Welcome, {user}!
 
-I'm QR Vault ??
+I'm QR Vault 💌
 
 I can create a beautiful memory page containing:
+📸 Photos
+🎵 Music
+💌 Messages
+🎨 Themes
+🔗 Shareable Link
+📱 QR Code
 
-?? Photo
-?? Music
-?? Personalized Message
-?? Theme
-?? Shareable Link
-
-Let's begin.
-
-Who is going to receive this memory?
-(Type their name)
+Who is this memory for?
 """
 
     await update.message.reply_text(
-        text,
-        reply_markup=ReplyKeyboardRemove(),
+        text.strip(),
+        reply_markup=ReplyKeyboardRemove()
     )
     return RECEIVER
 
 
-# -------- Receiver --------
+# ---------------- RECEIVER ----------------
 async def receiver(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["receiver"] = update.message.text.strip()
 
     keyboard = [
-        ["?? Love", "?? Birthday"],
-        ["?? Anime", "?? Cute"],
-        ["??? Memory", "? Elegant"],
+        ["❤️ Love", "🎂 Birthday"],
+        ["🌌 Anime", "🌸 Cute"],
+        ["✨ Elegant", "🖤 Memory"],
     ]
 
     await update.message.reply_text(
         "Choose a theme:",
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard,
-            resize_keyboard=True,
-            one_time_keyboard=True,
-        ),
+        reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
     )
     return THEME
 
 
-# -------- Theme --------
+# ---------------- THEME ----------------
 async def theme(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["theme"] = update.message.text.strip()
-    receiver_name = context.user_data["receiver"]
 
     await update.message.reply_text(
-        f"Great! ??\n\nNow send me the photo you'd like {receiver_name} to see.",
+        "Now send me a photo 📸",
         reply_markup=ReplyKeyboardRemove(),
     )
     return PHOTO
 
 
-# -------- Photo --------
-async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ---------------- PHOTO ----------------
+async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message.photo:
-        await update.message.reply_text("Please send a photo, not text.")
+        await update.message.reply_text("Please send a valid photo.")
         return PHOTO
 
-    photo_file = await update.message.photo[-1].get_file()
+    photo = update.message.photo[-1]
+    file = await photo.get_file()
 
-    os.makedirs("static/uploads", exist_ok=True)
-    filename = f"{update.effective_user.id}_{update.message.photo[-1].file_unique_id}.jpg"
-    filepath = os.path.join("static", "uploads", filename)
+    image_bytes = await file.download_as_bytearray()
+    context.user_data["image_bytes"] = bytes(image_bytes)
 
-    await photo_file.download_to_drive(filepath)
-
-    context.user_data["image_url"] = f"/static/uploads/{filename}"
-
-    await update.message.reply_text("Nice ??\n\nNow send the page title.")
+    await update.message.reply_text("Nice 👍\nNow send a title for this memory:")
     return TITLE
 
 
-# -------- Title --------
+# ---------------- TITLE ----------------
 async def title(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["title"] = update.message.text.strip()
-
-    await update.message.reply_text("Now send the message you want on the page ??")
+    await update.message.reply_text("Write a message 💌")
     return MESSAGE
 
 
-# -------- Message --------
-async def message_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ---------------- MESSAGE ----------------
+async def message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["message"] = update.message.text.strip()
-
-    await update.message.reply_text(
-        "Now send a music link for the page ??\n\nOr type: skip"
-    )
+    await update.message.reply_text("Optional: send music link 🎵 or type 'skip'")
     return MUSIC
 
 
-# -------- Music --------
+# ---------------- MUSIC ----------------
 async def music(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
 
-    if text.lower() == "skip":
-        context.user_data["music"] = None
-    else:
+    if text.lower() != "skip":
         context.user_data["music"] = text
+    else:
+        context.user_data["music"] = None
 
-    await update.message.reply_text("Finally, send your name (the sender name).")
+    await update.message.reply_text("Finally, send sender name 👤")
     return SENDER
 
 
-# -------- Sender --------
+# ---------------- SENDER ----------------
 async def sender(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["sender"] = update.message.text.strip()
 
-    receiver_name = context.user_data["receiver"]
-    sender_name = context.user_data["sender"]
-    title_text = context.user_data["title"]
-    message_body = context.user_data["message"]
-    image_url = context.user_data["image_url"]
-    music_url = context.user_data.get("music")
-    theme_name = context.user_data["theme"]
-
     try:
         page_id = create_page(
-            receiver=receiver_name,
-            sender=sender_name,
-            title=title_text,
-            message=message_body,
-            image_url=image_url,
-            music_url=music_url,
-            theme=theme_name,
+            receiver=context.user_data["receiver"],
+            sender=context.user_data["sender"],
+            title=context.user_data["title"],
+            message=context.user_data["message"],
+            image_bytes=context.user_data.get("image_bytes"),
+            music_url=context.user_data.get("music"),
+            theme=context.user_data.get("theme", "default"),
         )
 
-        base = (BASE_URL or "http://127.0.0.1:10000").rstrip("/")
-        page_link = f"{base}/page/{page_id}"
+        link = f"{BASE_URL}/page/{page_id}"
 
         await update.message.reply_text(
-            "?? Your QR Vault page is ready!\n\n"
-            f"?? {page_link}\n\n"
-            "Open the link in your browser to view it."
+            f"✅ Memory created successfully!\n\n🔗 Your page:\n{link}",
+            reply_markup=ReplyKeyboardRemove(),
         )
 
     except Exception as e:
-        print("CREATE PAGE ERROR:", e)
-        await update.message.reply_text(
-            "Something went wrong while creating the page. Please try again."
-        )
+        print("BOT ERROR:", e)
+        await update.message.reply_text(f"❌ Error while creating page:\n{e}")
 
-    context.user_data.clear()
     return ConversationHandler.END
 
 
-# -------- Cancel --------
+# ---------------- CANCEL ----------------
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data.clear()
     await update.message.reply_text(
         "Cancelled.",
-        reply_markup=ReplyKeyboardRemove(),
+        reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
 
 
-application = Application.builder().token(BOT_TOKEN).build()
-
-conv = ConversationHandler(
-    entry_points=[CommandHandler("start", start)],
-    states={
-        RECEIVER: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, receiver)
-        ],
-        THEME: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, theme)
-        ],
-        PHOTO: [
-            MessageHandler(filters.PHOTO, photo),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, photo),
-        ],
-        TITLE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, title)
-        ],
-        MESSAGE: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, message_text)
-        ],
-        MUSIC: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, music)
-        ],
-        SENDER: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, sender)
-        ],
-    },
-    fallbacks=[CommandHandler("cancel", cancel)],
-)
-
-application.add_handler(conv)
-
-
+# ---------------- RUN BOT ----------------
 def run_bot():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    application.run_polling()
+    application = Application.builder().token(BOT_TOKEN).build()
+
+    conv = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            RECEIVER: [MessageHandler(filters.TEXT & ~filters.COMMAND, receiver)],
+            THEME: [MessageHandler(filters.TEXT & ~filters.COMMAND, theme)],
+            PHOTO: [MessageHandler(filters.PHOTO, photo_handler)],
+            TITLE: [MessageHandler(filters.TEXT & ~filters.COMMAND, title)],
+            MESSAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, message)],
+            MUSIC: [MessageHandler(filters.TEXT & ~filters.COMMAND, music)],
+            SENDER: [MessageHandler(filters.TEXT & ~filters.COMMAND, sender)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
+
+    application.add_handler(conv)
+
+    print("Bot is running...")
+    application.run_polling(stop_signals=None)

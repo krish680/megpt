@@ -1,10 +1,8 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-BASE_URL = os.getenv("BASE_URL")
+
 PORT = int(os.getenv("PORT", 10000))
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:10000")

@@ -3,129 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} | QR Vault</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    <title>{{ title }}</title>
 
+    <style>
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: linear-gradient(135deg, #ffe4ec, #fff7fb);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            color: #222;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #111, #333);
+            color: white;
+            text-align: center;
+            padding: 20px;
         }
 
         .card {
-            width: 100%;
-            max-width: 700px;
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+            max-width: 550px;
+            margin: 30px auto;
+            background: rgba(255,255,255,0.08);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
         }
 
-        .hero img {
+        .main-image {
             width: 100%;
-            display: block;
-            max-height: 420px;
+            border-radius: 14px;
+            margin: 18px 0;
             object-fit: cover;
         }
 
-        .content {
-            padding: 28px;
-        }
-
-        .badge {
-            display: inline-block;
-            background: #ffeff5;
-            color: #d63384;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 14px;
-        }
-
-        h1 {
-            margin: 0 0 10px 0;
-            font-size: 32px;
-            line-height: 1.2;
+        .qr {
+            width: 200px;
+            margin-top: 20px;
+            border-radius: 12px;
+            background: white;
+            padding: 8px;
         }
 
         .meta {
-            margin: 0 0 18px 0;
-            color: #666;
-            font-size: 16px;
+            opacity: 0.9;
+            margin: 8px 0;
         }
 
         .message {
-            font-size: 18px;
-            line-height: 1.7;
-            white-space: pre-wrap;
-            margin-top: 20px;
-        }
-
-        .footer {
-            margin-top: 28px;
-            padding-top: 18px;
-            border-top: 1px solid #eee;
+            margin-top: 18px;
             font-size: 17px;
-            font-weight: 600;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
         audio {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 18px;
         }
 
-        @media (max-width: 600px) {
-            .content {
-                padding: 20px;
-            }
+        a.music-link {
+            color: #ffd369;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-            h1 {
-                font-size: 26px;
-            }
-
-            .message {
-                font-size: 16px;
-            }
+        h1, h2, h3, p {
+            margin-left: 0;
+            margin-right: 0;
         }
     </style>
 </head>
 <body>
+
     <div class="card">
+        <h2>{{ title }}</h2>
+
+        <p class="meta"><strong>To:</strong> {{ receiver }}</p>
+        <p class="meta"><strong>From:</strong> {{ sender }}</p>
+
         {% if image_url %}
-        <div class="hero">
-            <img src="{{ image_url }}" alt="Memory photo">
-        </div>
+            <img class="main-image" src="{{ image_url }}" alt="Memory Image">
         {% endif %}
 
-        <div class="content">
-            <div class="badge">{{ theme }}</div>
+        <p class="message">{{ message }}</p>
 
-            <h1>{{ title }}</h1>
-            <p class="meta">For <strong>{{ receiver }}</strong></p>
+        {% if music_url %}
+            <h3>Music 🎵</h3>
+            <p>
+                <a class="music-link" href="{{ music_url }}" target="_blank">Open music link</a>
+            </p>
+        {% endif %}
 
-            <div class="message">{{ message }}</div>
-
-            {% if music_url %}
-            <audio controls>
-                <source src="{{ music_url }}">
-                Your browser does not support audio.
-            </audio>
-            {% endif %}
-
-            <div class="footer">
-                From {{ sender }} ??
-            </div>
-        </div>
+        {% if qr_url %}
+            <h3>QR Code</h3>
+            <img class="qr" src="{{ qr_url }}" alt="QR Code">
+        {% endif %}
     </div>
+
 </body>
 </html>
