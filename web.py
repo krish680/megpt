@@ -4,7 +4,6 @@ from database import get_page
 app = Flask(__name__)
 
 
-# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return """
@@ -13,7 +12,6 @@ def home():
     """
 
 
-# ---------------- PAGE VIEW ----------------
 @app.route("/page/<page_id>")
 def page(page_id):
     try:
@@ -24,10 +22,10 @@ def page(page_id):
 
         return render_template(
             "page.html",
-            receiver=data["receiver"],
-            sender=data["sender"],
-            title=data["title"],
-            message=data["message"],
+            receiver=data.get("receiver"),
+            sender=data.get("sender"),
+            title=data.get("title"),
+            message=data.get("message"),
             image_url=data.get("image"),
             music_url=data.get("music"),
             theme=data.get("theme"),

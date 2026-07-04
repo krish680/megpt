@@ -1,6 +1,5 @@
 import uuid
 import io
-import json
 import qrcode
 from supabase import create_client
 from config import SUPABASE_URL, SUPABASE_KEY, BASE_URL
@@ -75,66 +74,19 @@ def create_page(receiver, sender, title, message, image_bytes=None, music_url=No
 
 
 # =========================
-# Parse weird Supabase JSON error
-# =========================
-def parse_supabase_json_error(err):
-    """
-    Handles errors like:
-
-    Error 200:
-    Message: JSON could not be generated
-    Hint: Refer to full message for details
-    Details: b'{"id":6,"receiver":"..."}'
-    """
-    try:
-        err_str = str(err)
-
-        # Case 1: "Details: b'...json...'"
-        if "Details: b'" in err_str:
-            start = err_str.find("Details: b'")
-            if start != -1:
-                start += len("Details: b'")
-                end = err_str.find("'", start)
-                if end != -1:
-                    raw = err_str[start:end]
-                    raw = raw.encode("latin1").decode("unicode_escape")
-                    return json.loads(raw)
-
-        # Case 2: dict-style string with 'details': 'b\'...\''
-        if "'details':" in err_str:
-            start = err_str.find("b'{")
-            end = err_str.rfind("}'")
-            if start != -1 and end != -1:
-                raw = err_str[start + 2:end + 2]   # strip leading b'
-                raw = raw.encode("latin1").decode("unicode_escape")
-                return json.loads(raw)
-
-        return None
-
-    except Exception as parse_error:
-        print("PARSE_SUPABASE_JSON_ERROR FAILED:", repr(parse_error))
-        return None
-
-
-# =========================
 # Get page
+# IMPORTANT: do NOT use .single()
 # =========================
 def get_page(page_id):
-    try:
-        response = (
-            supabase.table("pages")
-            .select("*")
-            .eq("id", page_id)
-            .single()
-            .execute()
-        )
-        return response.data
+    response = (
+        supabase.table("pages")
+        .select("*")
+        .eq("id", page_id)
+        .execute()
+    )
 
-    except Exception as e:
-        print("GET_PAGE RAW ERROR:", e)
+    rows = response.data or []
+    if not rows:
+        return None
 
-        fallback_data = parse_supabase_json_error(e)
-        if fallback_data:
-            return fallback_data
-
-        raise
+    return rows[0]
