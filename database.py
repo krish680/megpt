@@ -1,7 +1,6 @@
 import uuid
 import io
 import json
-import ast
 import qrcode
 from supabase import create_client
 from config import SUPABASE_URL, SUPABASE_KEY, BASE_URL
@@ -80,44 +79,35 @@ def create_page(receiver, sender, title, message, image_bytes=None, music_url=No
 # =========================
 def parse_supabase_json_error(err):
     """
-    Supabase sometimes returns the actual row inside:
-    error["details"] = 'b\'{"id":...}\''
-    We extract and decode it safely.
+    Handles errors like:
+
+    Error 200:
+    Message: JSON could not be generated
+    Hint: Refer to full message for details
+    Details: b'{"id":6,"receiver":"..."}'
     """
     try:
         err_str = str(err)
 
-        # Find the details section
-        if "'details':" not in err_str:
-            return None
+        # Case 1: "Details: b'...json...'"
+        if "Details: b'" in err_str:
+            start = err_str.find("Details: b'")
+            if start != -1:
+                start += len("Details: b'")
+                end = err_str.find("'", start)
+                if end != -1:
+                    raw = err_str[start:end]
+                    raw = raw.encode("latin1").decode("unicode_escape")
+                    return json.loads(raw)
 
-        start = err_str.find("'details': ")
-        if start == -1:
-            return None
-
-        details_part = err_str[start + len("'details': "):]
-
-        # ends before final }
-        # example: 'b\'{"id":6,...}\''
-        first_quote = details_part.find("'")
-        last_quote = details_part.rfind("'")
-
-        if first_quote == -1 or last_quote == -1 or last_quote <= first_quote:
-            return None
-
-        details_value = details_part[first_quote:last_quote + 1]
-
-        # Convert the Python string literal to actual string
-        parsed_literal = ast.literal_eval(details_value)
-
-        # parsed_literal should now be something like:
-        # b'{"id":6,"receiver":"..."}'
-        if isinstance(parsed_literal, bytes):
-            decoded = parsed_literal.decode("utf-8")
-            return json.loads(decoded)
-
-        if isinstance(parsed_literal, str):
-            return json.loads(parsed_literal)
+        # Case 2: dict-style string with 'details': 'b\'...\''
+        if "'details':" in err_str:
+            start = err_str.find("b'{")
+            end = err_str.rfind("}'")
+            if start != -1 and end != -1:
+                raw = err_str[start + 2:end + 2]   # strip leading b'
+                raw = raw.encode("latin1").decode("unicode_escape")
+                return json.loads(raw)
 
         return None
 
@@ -141,7 +131,7 @@ def get_page(page_id):
         return response.data
 
     except Exception as e:
-        print("GET_PAGE RAW ERROR:", repr(e))
+        print("GET_PAGE RAW ERROR:", e)
 
         fallback_data = parse_supabase_json_error(e)
         if fallback_data:
