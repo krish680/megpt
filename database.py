@@ -1,6 +1,7 @@
 import uuid
 import io
 import json
+import ast
 import qrcode
 from supabase import create_client
 from config import SUPABASE_URL, SUPABASE_KEY, BASE_URL
@@ -8,7 +9,9 @@ from config import SUPABASE_URL, SUPABASE_KEY, BASE_URL
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-# ---------------- Upload Image ----------------
+# =========================
+# Upload image to Supabase Storage
+# =========================
 def upload_image(file_bytes, filename="photo.jpg"):
     file_name = f"{uuid.uuid4()}_{filename}"
 
@@ -21,7 +24,9 @@ def upload_image(file_bytes, filename="photo.jpg"):
     return supabase.storage.from_("uploads").get_public_url(file_name)
 
 
-# ---------------- Generate QR ----------------
+# =========================
+# Generate QR and upload
+# =========================
 def generate_qr(url):
     qr = qrcode.make(url)
 
@@ -40,7 +45,9 @@ def generate_qr(url):
     return supabase.storage.from_("uploads").get_public_url(file_name)
 
 
-# ---------------- Create Page ----------------
+# =========================
+# Create page
+# =========================
 def create_page(receiver, sender, title, message, image_bytes=None, music_url=None, theme="default"):
     image_url = None
 
@@ -68,7 +75,60 @@ def create_page(receiver, sender, title, message, image_bytes=None, music_url=No
     return page_id
 
 
-# ---------------- Get Page ----------------
+# =========================
+# Parse weird Supabase JSON error
+# =========================
+def parse_supabase_json_error(err):
+    """
+    Supabase sometimes returns the actual row inside:
+    error["details"] = 'b\'{"id":...}\''
+    We extract and decode it safely.
+    """
+    try:
+        err_str = str(err)
+
+        # Find the details section
+        if "'details':" not in err_str:
+            return None
+
+        start = err_str.find("'details': ")
+        if start == -1:
+            return None
+
+        details_part = err_str[start + len("'details': "):]
+
+        # ends before final }
+        # example: 'b\'{"id":6,...}\''
+        first_quote = details_part.find("'")
+        last_quote = details_part.rfind("'")
+
+        if first_quote == -1 or last_quote == -1 or last_quote <= first_quote:
+            return None
+
+        details_value = details_part[first_quote:last_quote + 1]
+
+        # Convert the Python string literal to actual string
+        parsed_literal = ast.literal_eval(details_value)
+
+        # parsed_literal should now be something like:
+        # b'{"id":6,"receiver":"..."}'
+        if isinstance(parsed_literal, bytes):
+            decoded = parsed_literal.decode("utf-8")
+            return json.loads(decoded)
+
+        if isinstance(parsed_literal, str):
+            return json.loads(parsed_literal)
+
+        return None
+
+    except Exception as parse_error:
+        print("PARSE_SUPABASE_JSON_ERROR FAILED:", repr(parse_error))
+        return None
+
+
+# =========================
+# Get page
+# =========================
 def get_page(page_id):
     try:
         response = (
@@ -81,19 +141,10 @@ def get_page(page_id):
         return response.data
 
     except Exception as e:
-        err_text = str(e)
+        print("GET_PAGE RAW ERROR:", repr(e))
 
-        if "JSON could not be generated" in err_text and "details" in err_text:
-            try:
-                start = err_text.find("b'{")
-                end = err_text.rfind("}'")
+        fallback_data = parse_supabase_json_error(e)
+        if fallback_data:
+            return fallback_data
 
-                if start != -1 and end != -1:
-                    raw = err_text[start + 2:end + 2]
-                    raw_bytes = raw.encode("latin1")
-                    decoded = raw_bytes.decode("unicode_escape")
-                    return json.loads(decoded)
-            except Exception as inner_e:
-                print("FALLBACK PARSE ERROR:", inner_e)
-
-        raise e
+        raise
